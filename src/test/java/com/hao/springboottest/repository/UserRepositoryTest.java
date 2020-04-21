@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 
+import javax.persistence.criteria.CriteriaBuilder;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -38,6 +39,13 @@ class UserRepositoryTest {
         userAuths.setIdentifier("364");
         userAuths.setUId(user1.getUId());
         userAuthsRepository.save(userAuths);
+    }
+    @Test
+    void findUser(){
+        User user = new User();
+        user = userRepository.findByuId(Integer.valueOf("1057"));
+
+        System.out.println(user.toString());
     }
 
 
