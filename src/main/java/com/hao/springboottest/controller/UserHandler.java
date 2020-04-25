@@ -6,10 +6,7 @@ import com.hao.springboottest.entity.User;
 import com.hao.springboottest.entity.UserAuths;
 import com.hao.springboottest.repository.UserAuthsRepository;
 import com.hao.springboottest.repository.UserRepository;
-import com.hao.springboottest.utils.PasswordStore;
-import com.hao.springboottest.utils.TimeUtils;
-import com.hao.springboottest.utils.TokenService;
-import com.hao.springboottest.utils.UserLoginToken;
+import com.hao.springboottest.utils.*;
 import jdk.nashorn.internal.parser.Token;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,50 +28,61 @@ public class UserHandler {
     @Autowired
     TokenService tokenService;
     @PostMapping("/register")
-        public String save(@RequestBody Map<String,String> map) throws ParseException, InvalidKeySpecException, NoSuchAlgorithmException {
-        User user = new User();
-        user.setUName(map.get("uName"));
-        user.setUSex(map.get("uSex"));
-        Date uBirthday = TimeUtils.StringToDate(map.get("uBirthday"));
-        user.setUBirthday(uBirthday);
-        user.setUSignature("开卷有益");
-        user.setUAvatar("F:/");
-        User userResult = userRepository.save(user);
-        UserAuths userAuths = new UserAuths();
-        String[] pasAndSalt = new String[2];
-        pasAndSalt = PasswordStore.exchange(map.get("pass"));
-        userAuths.setSalt(pasAndSalt[0]);
-        userAuths.setCredential(pasAndSalt[1]);
-        userAuths.setIdentityType("email");
-        userAuths.setIdentifier(map.get("email"));
-        userAuths.setUId(userResult.getUId());
-        System.out.println(userAuths.toString());
-        userAuthsRepository.save(userAuths);
-        return "success";
+    public RetResult save(@RequestBody Map<String,String> map) throws ParseException, InvalidKeySpecException, NoSuchAlgorithmException {
+        String email = map.get("email");
+        RetResult retResult = new RetResult();
+        if(userAuthsRepository.findByIdentifier(email) == null){
+            User user = new User();
+            user.setUName(map.get("uName"));
+            user.setUSex(map.get("uSex"));
+            Date uBirthday = TimeUtils.StringToDate(map.get("uBirthday"));
+            user.setUBirthday(uBirthday);
+            user.setUSignature("开卷有益");
+            user.setUAvatar("F:/");
+            User userResult = userRepository.save(user);
+            UserAuths userAuths = new UserAuths();
+            String[] pasAndSalt = new String[2];
+            pasAndSalt = PasswordStore.exchange(map.get("pass"));
+            userAuths.setSalt(pasAndSalt[0]);
+            userAuths.setCredential(pasAndSalt[1]);
+            userAuths.setIdentityType("email");
+            userAuths.setIdentifier(email);
+            userAuths.setUId(userResult.getUId());
+            userAuthsRepository.save(userAuths);
+            retResult.setCode(RetCode.SUCCESS.getCode());
+            retResult.setMsg("注册成功");
+            return retResult;
+        }
+        retResult.setCode(RetCode.FAIL.getCode());
+        retResult.setMsg("此邮箱已注册");
+        return retResult;
     }
     @PostMapping("/login")
-    public Object login(@RequestBody Map<String,String> map) throws InvalidKeySpecException, NoSuchAlgorithmException {
+    public RetResult login(@RequestBody Map<String,String> map) throws InvalidKeySpecException, NoSuchAlgorithmException {
         JSONObject jsonObject = new JSONObject();
         String user_email = map.get("email");
         String user_pas = map.get("pass");
         User user = new User();
         UserAuths userAuths = new UserAuths();
+        RetResult retResult = new RetResult();
         userAuths = userAuthsRepository.findByIdentifier(user_email);
         if(userAuths != null){
             user = userRepository.findByuId(userAuths.getUId());
             String salt = userAuths.getSalt();
             String pas = userAuths.getCredential();
             if(PasswordStore.authenticate(user_pas,pas,salt)){
-                System.out.println("这是："+user);
-                System.out.println("这是："+userAuths);
                 String token = tokenService.getToken(user,userAuths);
                 jsonObject.put("token",token);
                 jsonObject.put("user",user);
                 System.out.println("登录成功");
-                return jsonObject;
+                retResult.setCode(RetCode.SUCCESS.getCode());
+                retResult.setData(jsonObject);
+                return retResult;
             }
         }
-        return "false";
+        retResult.setCode(RetCode.FALSE.getCode());
+        retResult.setMsg("账号或者密码输入错误");
+        return retResult;
     }
     @UserLoginToken
     @GetMapping("/getMessage")

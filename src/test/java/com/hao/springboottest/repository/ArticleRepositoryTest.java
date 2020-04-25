@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Date;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
@@ -60,5 +61,13 @@ class ArticleRepositoryTest {
             System.out.println(article);
         }
     }
+    @Test
+    void findAll(){
+        List<Article> articles;
+        articles = articleRepository.findByuId(1057);
+        System.out.println("===================================");
+        System.out.println(articles);
+    }
+
 
 }
