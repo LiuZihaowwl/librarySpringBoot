@@ -84,6 +84,20 @@ public class UserHandler {
         retResult.setMsg("账号或者密码输入错误");
         return retResult;
     }
+    @PutMapping("/updateUserMessage")
+    public RetResult updateUserMessage(@RequestBody Map<String,String> map) throws ParseException {
+        RetResult retResult = new RetResult();
+        String uid = map.get("uid");
+        String Date = map.get("uDate");
+        String userName = map.get("uName");
+        String uSex = map.get("uSex");
+        String uSignature = map.get("uSignature");
+        java.sql.Date date = TimeUtils.StringToDate(Date);
+        userRepository.updateByuId(userName,uSex,date,uSignature,Integer.valueOf(uid));
+        retResult.setCode(RetCode.SUCCESS.getCode());
+        retResult.setMsg("修改成功");
+        return retResult;
+    }
     @UserLoginToken
     @GetMapping("/getMessage")
     public String getMessage(){
