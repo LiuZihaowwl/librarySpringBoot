@@ -36,12 +36,6 @@ public class ArticleHandler {
             return "error";
         }
     }
-    @GetMapping("/showdemo")
-    public String showdemo(){
-        List<Article> articles;
-        articles = articleRepository.findAll();
-        return articles.get(2).getBody();
-    }
     @PostMapping("/getUserAllArticle")
     public RetResult getUserAllArticle(@RequestParam(value = "uid")String uid){
         RetResult retResult = new RetResult();

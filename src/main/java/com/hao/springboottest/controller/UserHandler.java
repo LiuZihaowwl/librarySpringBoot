@@ -27,6 +27,8 @@ public class UserHandler {
     private UserAuthsRepository userAuthsRepository;
     @Autowired
     TokenService tokenService;
+    @Autowired
+    private RedisService redisService;
     @PostMapping("/register")
     public RetResult save(@RequestBody Map<String,String> map) throws ParseException, InvalidKeySpecException, NoSuchAlgorithmException {
         String email = map.get("email");
